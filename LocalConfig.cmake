@@ -1,0 +1,1 @@
+set(CMAKE_PREFIX_PATH "C:/Qt/6.8.2/msvc2022_64" CACHE PATH "Путь к Qt6")
