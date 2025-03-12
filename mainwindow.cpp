@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("Важный вопрос"); 
     resize(400, 300);     
 
-    QLabel *label = new QLabel("Учишь плюсы?");
+    QLabel *label = new QLabel("Егор Голубев?");
 
     label->setFont(QFont("Arial", 24)); 
     label->setAlignment(Qt::AlignCenter);    
