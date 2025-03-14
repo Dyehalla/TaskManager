@@ -1,12 +1,8 @@
-#include <QApplication>
-#include "mainwindow.h"
+#include <iostream>
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);  // Создаем приложение Qt
+    std::cout << "Итак, вы решили учить плюсы";
 
-    MainWindow window;             // Создаем главное окно
-    window.show();                 // Показываем окно
-
-    return app.exec();             // Запускаем цикл обработки событий
+    return 0;
 }
