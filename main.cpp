@@ -31,7 +31,7 @@ wstring ansiToUtf16(const string& ansiString) {
 
 struct ProcessInfo //структура = класс с открытыми полями
 {
-    DWORD name;
+    wstring name;
     wstring path;
     long memoryUsage{};
     double cpuUsage{};
@@ -53,7 +53,7 @@ vector<ProcessInfo> GetProcessList() {
         do {
             ProcessInfo info;
             //Копируем имя процесса с помощью szExeFile.
-            info.name = wstring(ansiToUtf16(pe32.szExeFile));
+            info.name = ansiToUtf16(pe32.szExeFile);
             // Открываем процесс для доступа к информации:
             // PROCESS_QUERY_INFORMATION для запроса информации, PROCESS_VM_READ для чтения памяти,
             //False чтобы дочерние процессы не наследовали текущий дескриптор, pe32.th32ProcessID идентификатор процесса.
@@ -74,7 +74,7 @@ vector<ProcessInfo> GetProcessList() {
                 // Получаем время работы процесса в режиме ядра и пользователя
                 GetProcessTimes(hProcess, &creationTime, &exitTime, reinterpret_cast<LPFILETIME>(&kernelTimeStart),
                     reinterpret_cast<LPFILETIME>(&userTimeStart));
-                Sleep(100);
+                // Sleep(100);
                 // Ждем 100 мс и получаем время работы процесса снова
                 GetProcessTimes(hProcess, &creationTime, &exitTime, reinterpret_cast<LPFILETIME>(&kernelTimeEnd),
                     reinterpret_cast<LPFILETIME>(&userTimeEnd));
@@ -127,10 +127,10 @@ inline BOOL TerminateProcessById(DWORD processId) {
 int main() {
     vector<ProcessInfo> processes = GetProcessList();
     for (const auto& process : processes) {
-        wcout << L"Имя: " << process.name << endl;
-        wcout << L"Пусть: " << process.path << endl;
-        wcout << L"Память: " << process.memoryUsage << endl;
-        wcout << L"CPU: " << process.cpuUsage << L"%" << endl;
+        wcout << "Name: " << process.name << endl;
+        wcout << "Path: " << process.path << endl;
+        wcout << "Memory: " << process.memoryUsage << endl;
+        wcout << "CPU: " << process.cpuUsage << "%" << endl;
         wcout << endl;
     }
     return 0;
