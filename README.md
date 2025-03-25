@@ -18,3 +18,5 @@
    > cmake ..
 4) Собрать проект (делается каждый раз когда необходимо скомпилировать проект)
    > cmake --build .
+
+   build\Release> cmake --build ../. --config Release
