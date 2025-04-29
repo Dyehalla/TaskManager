@@ -1,13 +1,21 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-
 #include <QMainWindow>
+#include <QString>
 
-class MainWindow : public QMainWindow
-{
+// Форвард-декларация UI-класса (генерируется из .ui)
+namespace Ui {
+class MainWindow;
+}
+
+class MainWindow : public QMainWindow {
+    Q_OBJECT
+
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-};
 
-#endif 
+    void create_process_widget(const char * ExeName, const char * ExePath, const char * Memory, const char * CPU);
+
+
+private:
+    Ui::MainWindow *ui;  // Указатель на сгенерированный UI
+};

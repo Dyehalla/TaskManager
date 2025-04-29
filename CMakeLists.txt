@@ -10,6 +10,10 @@ find_package(Qt6 REQUIRED
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON) 
 
-add_executable(App main.cpp mainwindow.cpp mainwindow.h)
+qt_add_executable(App
+    mainwindow.cpp mainwindow.h mainwindow.ui
+    main.cpp
+    net.cpp
+)
 
 target_link_libraries(App PRIVATE Qt6::Core Qt6::Widgets)
