@@ -1,23 +1,42 @@
 #include <QApplication>
 #include <QLabel>
 #include "mainwindow.h"
+#include <vector>
+#include "ProcessInfo.h"
+
+
+std::vector<ProcessInfo> get_process_list();
+
+int bubbleSort(std::vector<ProcessInfo> &vector)
+{
+    int size = vector.size();
+    for (int i = 0; i < size - 1; i++)
+    {
+        for (int j = 0; j < size - i - 1; j++)
+        {
+            if (vector[j].memoryUsage < vector[j + 1].memoryUsage)
+                std::swap(vector[j], vector[j + 1]);
+        }
+    }
+    return size;
+}
+
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);  // Создаем приложение Qt
+    QApplication app(argc, argv);
+    MainWindow window;
 
-    MainWindow window;             // Создаем главное окно
-    std::vector<QLabel*> exe_name_label_buffer;
-    std::vector<QLabel*> exe_path_label_buffer;
-    std::vector<QLabel*> memory_label_buffer;
-    std::vector<QLabel*> cpu_label_buffer;
+    std::vector<ProcessInfo> processes = get_process_list();
+    int init_process_amount = processes.size();
 
-    window.create_process_widget("1", "2", "3", "4");
-    window.create_process_widget("1", "2", "3", "4");
+    for (int i = 0; i < init_process_amount; i++)
+    {
+        window.create_process_widget();
+    }
 
-    window.show();                 // Показываем окно
+    window.update_processes();
+    window.show();
 
-
-
-    return app.exec();             // Запускаем цикл обработки событий
+    return app.exec();
 }
