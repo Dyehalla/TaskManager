@@ -19,6 +19,8 @@ qt_add_executable(App
     net.cpp
     process_info.cpp
     ProcessInfo.h
+    table.ui
+
 
 )
 target_include_directories(App PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

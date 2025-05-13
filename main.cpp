@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
         window.create_process_widget();
     }
 
+
+
     window.update_processes();
     window.show();
 

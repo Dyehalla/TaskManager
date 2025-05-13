@@ -16,12 +16,19 @@ public:
     std::vector<QLabel*> memory_label_buffer;
     std::vector<QLabel*> cpu_label_buffer;
 
+    std::vector<QLabel*> net_exe_name_label_buffer;
+    std::vector<QLabel*> net_exe_path_label_buffer;
+    std::vector<QLabel*> network_in_label_buffer;
+    std::vector<QLabel*> network_out_label_buffer;
+
     int process_widget_amount;
+    int network_widget_amount;
 
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
     void create_process_widget();
+    void create_network_widget();
     void delete_process_widget();
     void update_processes();
 

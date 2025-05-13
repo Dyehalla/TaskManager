@@ -16,7 +16,5 @@ public:
     LONG BytesIn;
     LONG OutboundBandwidth;
     LONG InboundBandwidth;
-    int Pass = 0;
-    std::string CollectionTime;
 
 };

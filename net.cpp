@@ -2,17 +2,9 @@
 #include "NetworkPerformanceScanner.h"
 
 
-NetworkPerformanceScanner::NetworkPerformanceScanner()
-{
-}
-
-
-NetworkPerformanceScanner::~NetworkPerformanceScanner()
-{
-}
 
 // TODO - implement TCP v6, UDP
-std::vector<NetworkPerformanceItem> NetworkPerformanceScanner::ScanNetworkPerformance(int pass)
+std::vector<NetworkPerformanceItem> scan_network_performance()
 {
 
     std::vector<unsigned char> buffer;
@@ -20,13 +12,6 @@ std::vector<NetworkPerformanceItem> NetworkPerformanceScanner::ScanNetworkPerfor
     DWORD dwRetValue = 0;
     vector<NetworkPerformanceItem> networkPerformanceItems;
 
-    // get local computer time with timezone offset
-    auto time = std::time(nullptr);
-    std::ostringstream timeStream;
-    timeStream << std::put_time(std::localtime(&time), "%F %T%z");
-    string collectionTime = timeStream.str();
-
-    // repeat till buffer is big enough
     do
     {
         buffer.resize(dwSize, 0);
@@ -36,8 +21,6 @@ std::vector<NetworkPerformanceItem> NetworkPerformanceScanner::ScanNetworkPerfor
 
     if (dwRetValue == ERROR_SUCCESS)
     {
-        // good case
-
         // cast to access element values
         PMIB_TCPTABLE_OWNER_PID ptTable = reinterpret_cast<PMIB_TCPTABLE_OWNER_PID>(buffer.data());
 
@@ -150,8 +133,6 @@ std::vector<NetworkPerformanceItem> NetworkPerformanceScanner::ScanNetworkPerfor
                 cout << networkPerformanceItem.InboundBandwidth / 1024 / 1024 << "Mb/s" << endl << endl;
 
             }
-            networkPerformanceItem.Pass = pass;
-            networkPerformanceItem.CollectionTime = collectionTime;
             networkPerformanceItems.push_back(networkPerformanceItem);
         }
     }

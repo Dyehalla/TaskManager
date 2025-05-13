@@ -26,12 +26,5 @@ using namespace std;
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 
-class NetworkPerformanceScanner
-{
-public:
-    NetworkPerformanceScanner();
-    ~NetworkPerformanceScanner();
-
-    std::vector<NetworkPerformanceItem> ScanNetworkPerformance(int sampleId);
-};
+std::vector<NetworkPerformanceItem> scan_network_performance();
 

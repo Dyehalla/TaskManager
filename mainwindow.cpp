@@ -1,13 +1,19 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"  // Автоматически сгенерированный файл
 #include "ProcessInfo.h"
-#include <string>
-#include <algorithm>
+
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);  // Инициализация UI
     connect(ui->UpdateButton, &QPushButton::clicked, this, &MainWindow::update_processes);
+    connect(ui->NetworkPageButton, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentIndex(1); // Переключаем на вторую страницу
+    });
+    connect(ui->ProcessPageButton, &QPushButton::clicked, this, [this]() {
+        ui->stackedWidget->setCurrentIndex(0); // Переключаем на вторую страницу
+    });
     process_widget_amount = 0;
+    network_widget_amount = 0;
 }
 
 MainWindow::~MainWindow() {
@@ -121,3 +127,60 @@ void MainWindow::create_process_widget()
     memory_label_buffer.push_back(MemoryLabel);
     cpu_label_buffer.push_back(CPULabel);
 }
+
+void MainWindow::create_network_widget()
+{
+    QWidget *NetworkWidget;
+    QHBoxLayout *horizontalLayout;
+    QLabel *ExeNameLabel;
+    QLabel *ExePathLabel;
+    QLabel *NetworkIn;
+    QLabel *NetworkOut;
+    NetworkWidget = new QWidget(ui -> scrollAreaWidgetContents);
+
+    NetworkWidget->setStyleSheet(
+        "QWidget {"
+        "   border: 1px solid #FF0000;"  // Красная рамка толщиной 2px
+        "}"
+        );
+
+    NetworkWidget->setMinimumSize(QSize(0, 30));
+    NetworkWidget->setMaximumSize(QSize(16777215, 20));
+    NetworkWidget->setAutoFillBackground(true);
+    horizontalLayout = new QHBoxLayout(NetworkWidget);
+    horizontalLayout->setContentsMargins(0, 0, 0, 0);
+    ExeNameLabel = new QLabel(NetworkWidget);
+
+    ExeNameLabel->setAlignment(Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter);
+
+    horizontalLayout->addWidget(ExeNameLabel);
+
+    ExePathLabel = new QLabel(NetworkWidget);
+
+    horizontalLayout->addWidget(ExePathLabel);
+
+    NetworkIn = new QLabel(NetworkWidget);
+    NetworkIn->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+    horizontalLayout->addWidget(NetworkIn);
+
+    NetworkOut = new QLabel(NetworkWidget);
+    NetworkOut->setAlignment(Qt::AlignmentFlag::AlignCenter);
+
+    // ExeNameLabel->setText(QCoreApplication::translate("MainWindow", ExeName, nullptr));
+    // ExePathLabel->setText(QCoreApplication::translate("MainWindow", ExePath, nullptr));
+    // MemoryLabel->setText(QCoreApplication::translate("MainWindow", Memory, nullptr));
+    // CPULabel->setText(QCoreApplication::translate("MainWindow", CPU, nullptr));
+
+    horizontalLayout->addWidget(NetworkOut);
+
+    ui->NetworkLayout->insertWidget(network_widget_amount + 2, NetworkWidget);
+    network_widget_amount += 1;
+
+    exe_name_label_buffer.push_back(ExeNameLabel);
+    exe_path_label_buffer.push_back(ExePathLabel);
+    memory_label_buffer.push_back(NetworkIn);
+    cpu_label_buffer.push_back(NetworkOut);
+}
+
+
