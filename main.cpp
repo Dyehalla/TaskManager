@@ -30,14 +30,15 @@ int main(int argc, char *argv[])
     std::vector<ProcessInfo> processes = get_process_list();
     int init_process_amount = processes.size();
 
-    for (int i = 0; i < init_process_amount; i++)
-    {
-        window.create_process_widget();
-    }
-
-
+    // for (int i = 0; i < init_process_amount; i++)
+    // {
+    //     window.create_process_widget();
+    // }
 
     window.update_processes();
+
+
+
     window.show();
 
     return app.exec();

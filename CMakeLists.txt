@@ -19,7 +19,7 @@ qt_add_executable(App
     net.cpp
     process_info.cpp
     ProcessInfo.h
-    table.ui
+
 
 
 )
