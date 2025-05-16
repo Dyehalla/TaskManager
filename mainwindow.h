@@ -1,7 +1,7 @@
 #include <QMainWindow>
 #include <QString>
 #include <QLabel>
-
+#include <QNetworkAccessManager>
 #define PROCESS_TABLE 0
 #define NETWORK_TABLE 1
 
@@ -14,6 +14,7 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
+    QNetworkAccessManager networkManager;
     int current_table = PROCESS_TABLE;
 
     explicit MainWindow(QWidget *parent = nullptr);
@@ -27,7 +28,7 @@ public:
     void update_networks();
     void update_button();
     void erase_column(int col);
-
+    void test();
 
 // private:
     Ui::MainWindow *ui;  // Указатель на сгенерированный UI

@@ -1,9 +1,9 @@
-#include <QApplication>
-#include <QLabel>
 #include "mainwindow.h"
-#include <vector>
 #include "ProcessInfo.h"
-
+#include "virustotal.h"
+#include <vector>
+#include <QLabel>
+#include <QApplication>
 
 std::vector<ProcessInfo> get_process_list();
 
@@ -14,6 +14,7 @@ int bubbleSort(std::vector<ProcessInfo> &vector);
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
     MainWindow window;
 
     // for (int i = 0; i < init_process_amount; i++)

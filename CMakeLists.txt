@@ -4,7 +4,7 @@ include("LocalConfig.cmake")
 project ("Task Manager")
 
 find_package(Qt6 REQUIRED 
-  COMPONENTS Widgets Gui Core
+  COMPONENTS Widgets Gui Core Network
 )
 
 set(CMAKE_AUTOMOC ON)
@@ -19,10 +19,12 @@ qt_add_executable(App
     net.cpp
     process_info.cpp
     ProcessInfo.h
+    virustotal.cpp
+    virustotal.h
 
 
 
 )
 target_include_directories(App PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(App PRIVATE Qt6::Core Qt6::Widgets)
+target_link_libraries(App PRIVATE Qt6::Core Qt6::Widgets Qt6::Network)
 

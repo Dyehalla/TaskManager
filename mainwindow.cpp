@@ -4,7 +4,23 @@
 #include "NetworkPerformanceItem.h"
 #include <iostream>
 #include <QDebug>
+#include "virustotal.h"
+#include <QThread>
+void MainWindow::test(){
+    const QString apiKey = "332b1e51ec7ce35a0738543eb468611f333500ed9e39bfe46cd5e75db041b77b";
+    const QString filePath = "C:/games/Braid.Anniversary.Edition.v20240603/braid64_d3d11_final.exe";
 
+    // Загружаем файл
+    QString analysisId = uploadFileToVirusTotal(networkManager, filePath, apiKey);
+
+
+    qDebug() << "Analysis ID:" << analysisId;
+
+    // Получаем отчет
+    QThread::msleep(5000);
+    QJsonObject report = getVirusTotalReport(networkManager, analysisId, apiKey);
+    qDebug() << "Report:" << report;
+}
 
 void MainWindow::init_table(){
     for (int row = 0; row <= 70; row++){
@@ -25,7 +41,7 @@ void MainWindow::init_table(){
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);  // Инициализация UI
-    connect(ui->UpdateButton, &QPushButton::clicked, this, &MainWindow::update_button);
+    connect(ui->UpdateButton, &QPushButton::clicked, this, &MainWindow::test);
     connect(ui->NetworkPageButton, &QPushButton::clicked, this, &MainWindow::draw_network_table);
     connect(ui->ProcessPageButton, &QPushButton::clicked, this, &MainWindow::draw_process_table);
 
