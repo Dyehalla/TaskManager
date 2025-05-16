@@ -6,18 +6,6 @@
 #include "ProcessInfo.h"
 using namespace std;
 
-// менялка кодировки
-// wstring ansiToUtf16(const string& ansiString) {
-//     int len = MultiByteToWideChar(CP_ACP, 0, ansiString.c_str(), -1, nullptr, 0);
-//     if (len == 0) {
-//         return L"";
-//     }
-//     wstring utf16String(len - 1, L'\0');
-//     MultiByteToWideChar(CP_ACP, 0, ansiString.c_str(), -1, &utf16String[0], len);
-//     return utf16String;
-// }
-
-
 vector<ProcessInfo> get_process_list() {
     vector<ProcessInfo> processes;
 
@@ -59,6 +47,20 @@ vector<ProcessInfo> get_process_list() {
     }
     CloseHandle(hSnapshot);
     return processes;
+}
+
+int bubbleSort(std::vector<ProcessInfo> &vector)
+{
+    int size = vector.size();
+    for (int i = 0; i < size - 1; i++)
+    {
+        for (int j = 0; j < size - i - 1; j++)
+        {
+            if (vector[j].memoryUsage < vector[j + 1].memoryUsage)
+                std::swap(vector[j], vector[j + 1]);
+        }
+    }
+    return size;
 }
 
 

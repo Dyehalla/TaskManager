@@ -7,9 +7,9 @@
 #include "NetworkPerformanceItem.h"
 #include <iomanip>
 #include <iostream>
-
 #include <winsock2.h>
 #include <windows.h>
+#include <psapi.h>
 #include <ws2ipdef.h>
 #include <iphlpapi.h>
 #include <Tcpestats.h>
@@ -26,5 +26,5 @@ using namespace std;
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
 
-std::vector<NetworkPerformanceItem> scan_network_performance();
+std::vector<NetworkPerformanceItem> get_networks_list();
 

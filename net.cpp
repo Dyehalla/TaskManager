@@ -1,45 +1,64 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "NetworkPerformanceScanner.h"
+#include "ProcessInfo.h"
+#include <QDebug>
 
+std::string get_filename_from_path(const std::string& path) {
+    size_t pos = path.find_last_of("\\/");
+    if (pos != std::string::npos) {
+        return path.substr(pos + 1);
+    }
+    return path;
+}
 
+int bubbleSortNet(std::vector<NetworkPerformanceItem> &vector)
+{
+    int size = vector.size();
+    for (int i = 0; i < size - 1; i++)
+    {
+        for (int j = 0; j < size - i - 1; j++)
+        {
+            if (vector[j].InboundBandwidth < vector[j + 1].InboundBandwidth)
+                std::swap(vector[j], vector[j + 1]);
+        }
+    }
+    return size;
+}
 
 // TODO - implement TCP v6, UDP
-std::vector<NetworkPerformanceItem> scan_network_performance()
+std::vector<NetworkPerformanceItem> get_networks_list()
 {
-
     std::vector<unsigned char> buffer;
     DWORD dwSize = sizeof(MIB_TCPTABLE_OWNER_PID);
     DWORD dwRetValue = 0;
     vector<NetworkPerformanceItem> networkPerformanceItems;
 
-    do
-    {
+    do{
         buffer.resize(dwSize, 0);
         dwRetValue = GetExtendedTcpTable(buffer.data(), &dwSize, TRUE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0);
-
     } while (dwRetValue == ERROR_INSUFFICIENT_BUFFER);
 
     if (dwRetValue == ERROR_SUCCESS)
     {
-        // cast to access element values
         PMIB_TCPTABLE_OWNER_PID ptTable = reinterpret_cast<PMIB_TCPTABLE_OWNER_PID>(buffer.data());
 
-        cout << "Number of Entries: " << ptTable->dwNumEntries << endl << endl;
-
-
-        // caution: array starts with index 0, count starts by 1
         for (DWORD i = 0; i < ptTable->dwNumEntries; i++)
         {
             NetworkPerformanceItem networkPerformanceItem;
 
+            // Ищем процесс, получаем имя и путь
             networkPerformanceItem.ProcessId = ptTable->table[i].dwOwningPid;
-            networkPerformanceItem.State = ptTable->table[i].dwState;
-
-            if (ptTable->table[i].dwOwningPid != 13720) {
+            HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, ptTable->table[i].dwOwningPid);
+            char path[MAX_PATH] = { 0 };
+            if (GetModuleFileNameExA(hProcess, NULL, path, MAX_PATH) == 0) {
+                CloseHandle(hProcess);
+                // cout << "path not found\n";
                 continue;
             }
-            cout << "PID: " << ptTable->table[i].dwOwningPid << endl;
-            cout << "State: " << ptTable->table[i].dwState << endl;
+            networkPerformanceItem.ExePath = path;
+            networkPerformanceItem.ExeName = get_filename_from_path(path);
+
+            networkPerformanceItem.State = ptTable->table[i].dwState;
 
             std::ostringstream localStream;
             localStream << (ptTable->table[i].dwLocalAddr & 0xFF)
@@ -80,68 +99,46 @@ std::vector<NetworkPerformanceItem> scan_network_performance()
                 ULONG rosSize = 0, rodSize = 0;
                 ULONG winStatus;
                 PUCHAR ros = NULL, rod = NULL;
-                rodSize = sizeof(TCP_ESTATS_DATA_ROD_v0);
-                PTCP_ESTATS_DATA_ROD_v0 dataRod = { 0 };
+                rodSize = sizeof(TCP_ESTATS_BANDWIDTH_ROD_v0);
 
-                if (rosSize != 0) {
-                    ros = (PUCHAR)malloc(rosSize);
-                    if (ros == NULL) {
-                        wprintf(L"\nOut of memory");
-                        return networkPerformanceItems;
-                    }
-                    else
-                        memset(ros, 0, rosSize); // zero the buffer
+                rod = (PUCHAR)malloc(rodSize);
+                if (rod == NULL) {
+                    free(ros);
+                    wprintf(L"\nOut of memory");
+                    return networkPerformanceItems;
                 }
-                if (rodSize != 0) {
-                    rod = (PUCHAR)malloc(rodSize);
-                    if (rod == NULL) {
-                        free(ros);
-                        wprintf(L"\nOut of memory");
-                        return networkPerformanceItems;
-                    }
-                    else
-                        memset(rod, 0, rodSize); // zero the buffer
-                }
-
-                winStatus = GetPerTcpConnectionEStats((PMIB_TCPROW)&row, TcpConnectionEstatsData, NULL, 0, 0, ros, 0, rosSize, rod, 0, rodSize);
-
-                dataRod = (PTCP_ESTATS_DATA_ROD_v0)rod;
-
-                networkPerformanceItem.BytesIn = dataRod->DataBytesIn;
-                networkPerformanceItem.BytesOut = dataRod->DataBytesOut;
+                else
+                    memset(rod, 0, rodSize); // зануляем буфер
 
                 PTCP_ESTATS_BANDWIDTH_ROD_v0 bandwidthRod = { 0 };
 
-                rodSize = sizeof(TCP_ESTATS_BANDWIDTH_ROD_v0);
-                if (rodSize != 0) {
-                    rod = (PUCHAR)malloc(rodSize);
-                    if (rod == NULL) {
-                        free(ros);
-                        wprintf(L"\nOut of memory");
-                        return networkPerformanceItems;
-                    }
-                    else
-                        memset(rod, 0, rodSize); // zero the buffer
-                }
-
                 winStatus = GetPerTcpConnectionEStats((PMIB_TCPROW)&row, TcpConnectionEstatsBandwidth, NULL, 0, 0, ros, 0, rosSize, rod, 0, rodSize);
+                if (winStatus != NO_ERROR) {
+                    free(rod);
+                    cout << "what the FUCK is that\n" << endl;
+                    continue;
+                }
 
                 bandwidthRod = (PTCP_ESTATS_BANDWIDTH_ROD_v0)rod;
                 networkPerformanceItem.OutboundBandwidth = bandwidthRod->OutboundBandwidth;
                 networkPerformanceItem.InboundBandwidth = bandwidthRod->InboundBandwidth;
-                cout << networkPerformanceItem.OutboundBandwidth / 1024 / 1024 << "Mb/s" << endl;
-                cout << networkPerformanceItem.InboundBandwidth / 1024 / 1024 << "Mb/s" << endl << endl;
-
+                free(rod);
+            }
+            else {
+                networkPerformanceItem.OutboundBandwidth = 0;
+                networkPerformanceItem.InboundBandwidth = 0;
             }
             networkPerformanceItems.push_back(networkPerformanceItem);
         }
     }
     else
     {
-        // bad case, do some sh*t here
+        // пизда рулям если сюда попали
     }
 
+    bubbleSortNet(networkPerformanceItems);
     return networkPerformanceItems;
 }
+
 
 
