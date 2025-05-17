@@ -67,7 +67,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QTableView" name="ProcessTable"/>
+        <widget class="QTableView" name="ProcessTable">
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectionBehavior::SelectItems</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

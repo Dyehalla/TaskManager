@@ -3,7 +3,7 @@
 #include "ProcessInfo.h"
 #include "NetworkPerformanceItem.h"
 #include "virustotal.h"
-
+#include "vt_dialog.h"
 
 void MainWindow::test(){
     const QString apiKey = "332b1e51ec7ce35a0738543eb468611f333500ed9e39bfe46cd5e75db041b77b";
@@ -27,22 +27,46 @@ void MainWindow::init_table(){
     ui->ProcessTable->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     ui->ProcessTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->ProcessTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->ProcessTable->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->ProcessTable, &QTableView::customContextMenuRequested, this, &MainWindow::showContextMenu);
 
     for (int i = 0; i <= 5; i++){
         model->insertColumn(0);
     }
     ui->ProcessTable->setStyleSheet(
-        "QTableView {"
-        "    border: 1px solid gray;"
-        "}"
-        "QTableView::item:hover {"
-        "    border: 2px solid blue;"  // Обводка при наведении
-        "    background: rgba(200, 200, 255, 50);"  // Лёгкий голубой фон
-        "}"
+        "QTableView::item:hover { background-color: none; }"
+
         );
 
     draw_process_table();
 }
+
+void MainWindow::vt_check(std::wstring path) {
+    VtDialog dialog(this, path);
+    dialog.exec();
+}
+
+
+void MainWindow::showContextMenu(const QPoint& pos) {
+    QModelIndex index = ui->ProcessTable->indexAt(pos);
+    if (!index.isValid()) return;
+
+    QMenu menu;
+    QAction* action1 = menu.addAction("Посмотреть в проводнике");
+    QAction* action2 = menu.addAction("Завершить процесс");
+    QAction* action3 = menu.addAction("VirusTotal");
+
+    QAction* selected = menu.exec(ui->ProcessTable->viewport()->mapToGlobal(pos));
+    if (selected == action1) {
+        std::wstring path = path_vector[index.row()];
+        QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(QString(path)).absolutePath()));
+    } else if (selected == action2) {
+        // TerminateProcessById(model-> index.row())
+    } else if (selected == action3) {
+        vt_check(path_vector[index.row()]);
+    }
+}
+
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     model = new NonEditableModel;
@@ -74,10 +98,13 @@ void MainWindow::update_processes(){
     ui->ProcessTable->setUpdatesEnabled(false); // отключаем сигналы чтоб кути хернёй маялся
     int size = bubbleSort(processes);
     int i = 0;
+    path_vector.clear();
     for (ProcessInfo &proc : processes){
+        path_vector.push_back(proc.path);
         model->setItem(i, 0, new QStandardItem(QString(proc.name)));
-        // model->setItem(i, 1, new QStandardItem(QString(proc.path)));
-        model->setItem(i, 2, new QStandardItem(QString("%1").arg(proc.memoryUsage)));
+        model->setItem(i, 1, new QStandardItem(QString("%1").arg(proc.memoryUsage)));
+        model->setItem(i, 2, new QStandardItem(QString("%1").arg(proc.cpuUsage)));
+        model->setItem(i, 3, new QStandardItem(QString("%1").arg(proc.pid)));
         i++;
     }
     ui->ProcessTable->setUpdatesEnabled(true);
@@ -106,7 +133,8 @@ void MainWindow::update_networks(){
     std::vector<NetworkPerformanceItem> networks =  get_networks_list();
     update_table_rows_amount(networks.size());
     ui->ProcessTable->setUpdatesEnabled(false); // отключаем сигналы чтоб кути хернёй маялся
-    int i = 0;for (NetworkPerformanceItem &perf : networks){
+    int i = 0;
+    for (NetworkPerformanceItem &perf : networks){
         model->setItem(i, 0, new QStandardItem(QString(perf.ExeName)));
         model->setItem(i, 1, new QStandardItem(QString("%1").arg(perf.OutboundBandwidth / 1024 / 1024)));
         model->setItem(i, 2, new QStandardItem(QString("%1").arg(perf.InboundBandwidth / 1024 / 1024)));
@@ -126,9 +154,8 @@ void MainWindow::draw_network_table(){
 
 void MainWindow::draw_process_table(){
     current_table = PROCESS_TABLE;
-    model->setHorizontalHeaderLabels({"Exe name", "Memory", "CPU", "", "", ""});
+    model->setHorizontalHeaderLabels({"Exe name", "Memory", "CPU", "PID", "", ""});
     update_processes();
-    erase_column(3);
     erase_column(4);
     resize_columns_to_content();
 }

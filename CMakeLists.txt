@@ -21,10 +21,9 @@ qt_add_executable(App
     ProcessInfo.h
     virustotal.cpp
     virustotal.h
-
-
-
+    vt_dialog.cpp vt_dialog.h vt_dialog.ui
 )
+
 target_include_directories(App PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(App PRIVATE Qt6::Core Qt6::Widgets Qt6::Network)
 

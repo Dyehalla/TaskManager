@@ -6,6 +6,7 @@
 #include <windows.h>
 #include <tlhelp32.h>
 #include <psapi.h>
+#include <qDebug>
 
 struct ProcessInfo
 {
@@ -13,8 +14,10 @@ struct ProcessInfo
     std::wstring path;
     long memoryUsage{};
     double cpuUsage{};
+    int pid;
 };
 
 std::vector<ProcessInfo> get_process_list();
 int bubbleSort(std::vector<ProcessInfo> &vector);
+inline BOOL TerminateProcessById(DWORD processId);
 #endif // PROCESSINFO_H
