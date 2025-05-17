@@ -41,7 +41,7 @@ void MainWindow::init_table(){
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);  // Инициализация UI
-    connect(ui->UpdateButton, &QPushButton::clicked, this, &MainWindow::test);
+    connect(ui->UpdateButton, &QPushButton::clicked, this, &MainWindow::update_button);
     connect(ui->NetworkPageButton, &QPushButton::clicked, this, &MainWindow::draw_network_table);
     connect(ui->ProcessPageButton, &QPushButton::clicked, this, &MainWindow::draw_process_table);
 
