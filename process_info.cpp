@@ -1,8 +1,3 @@
-#include <vector>
-#include <string>
-#include <windows.h>
-#include <tlhelp32.h>
-#include <psapi.h>
 #include "ProcessInfo.h"
 using namespace std;
 
@@ -63,22 +58,17 @@ int bubbleSort(std::vector<ProcessInfo> &vector)
     return size;
 }
 
-
 // Функция для завершения процесса по ID (не знаю зачем инлайн, слион подсказал я согласился)
 inline BOOL TerminateProcessById(DWORD processId) {
     // Открываем процесс с правом на завершение:
     // PROCESS_TERMINATE - процесс с правом на завершение,
     // FALSE - дескриптор не будет наследоваться,
-    // procesId - индентификатор процесса.
+    // procesId - индентификатор процесса
     HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, processId);
     if (hProcess == NULL) {
         return FALSE;
     }
 
-    // Завершаем процесс:
-    // hProcess - дескриптор процесса,
-    // uExitCode - это код выхода, который передаётся процессу при его завершении, число обозначает статус с которыом процесс завершился.
-    // Здесь передаётся 0, что обычно указывает на нормальное завершение.
     BOOL result = ::TerminateProcess(hProcess, 0);
     // Закрываем хэндл процесса
     CloseHandle(hProcess);

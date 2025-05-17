@@ -3,9 +3,9 @@
 #include "ProcessInfo.h"
 #include <QDebug>
 
-std::string get_filename_from_path(const std::string& path) {
-    size_t pos = path.find_last_of("\\/");
-    if (pos != std::string::npos) {
+std::wstring get_filename_from_path(const std::wstring& path) {
+    size_t pos = path.find_last_of(L"\\/");
+    if (pos != std::wstring::npos) {
         return path.substr(pos + 1);
     }
     return path;
@@ -49,8 +49,8 @@ std::vector<NetworkPerformanceItem> get_networks_list()
             // Ищем процесс, получаем имя и путь
             networkPerformanceItem.ProcessId = ptTable->table[i].dwOwningPid;
             HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, ptTable->table[i].dwOwningPid);
-            char path[MAX_PATH] = { 0 };
-            if (GetModuleFileNameExA(hProcess, NULL, path, MAX_PATH) == 0) {
+            wchar_t path[MAX_PATH] = { 0 };
+            if (GetModuleFileNameExW(hProcess, NULL, path, MAX_PATH) == 0) {
                 CloseHandle(hProcess);
                 // cout << "path not found\n";
                 continue;

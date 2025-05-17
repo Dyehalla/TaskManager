@@ -1,8 +1,11 @@
 #ifndef PROCESSINFO_H
 #define PROCESSINFO_H
 
-#include <string>
 #include <vector>
+#include <string>
+#include <windows.h>
+#include <tlhelp32.h>
+#include <psapi.h>
 
 struct ProcessInfo
 {

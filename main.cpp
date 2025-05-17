@@ -22,9 +22,7 @@ int main(int argc, char *argv[])
     //     window.create_process_widget();
     // }
 
-    // window.update_processes();
 
-    window.draw_process_table();
 
     window.show();
 

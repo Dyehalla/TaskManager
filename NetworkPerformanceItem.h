@@ -9,8 +9,8 @@ public:
 
     INT ProcessId;
     INT State;
-    std::string ExeName;
-    std::string ExePath;
+    std::wstring ExeName;
+    std::wstring ExePath;
     std::string LocalAddress;
     std::string RemoteAddress;
     int LocalPort;
