@@ -4,31 +4,39 @@
 #include "NetworkPerformanceItem.h"
 #include "virustotal.h"
 #include "vt_dialog.h"
+#include <QSortFilterProxyModel>
+
+#define PROCESS_TABLE_COL_COUNT 4
+#define NETWORK_TABLE_COL_COUNT 6
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     model = new NonEditableModel;
+    sort_model = new CustomSortModel(this, &current_table);
+    sort_model -> setSourceModel(model);
+
     ui->setupUi(this);  // Инициализация UI
+    ui->ProcessTable->verticalHeader()->setVisible(false);
+
     connect(ui->UpdateButton, &QPushButton::clicked, this, &MainWindow::update_button);
     connect(ui->NetworkPageButton, &QPushButton::clicked, this, &MainWindow::draw_network_table);
     connect(ui->ProcessPageButton, &QPushButton::clicked, this, &MainWindow::draw_process_table);
     connect(ui->ChangeApiKey, &QPushButton::clicked, this, &MainWindow::set_virustotal_api_key);
+    connect(ui->ProcessTable->horizontalHeader(), &QHeaderView::sectionClicked,
+            this, &MainWindow::header_click);
 
     init_table();
 
 }
 
 void MainWindow::init_table(){
+    ui->ProcessTable->setModel(sort_model);
 
-    ui->ProcessTable->setModel(model);
     ui->ProcessTable->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     ui->ProcessTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->ProcessTable->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->ProcessTable->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->ProcessTable, &QTableView::customContextMenuRequested, this, &MainWindow::showContextMenu);
 
-    for (int i = 0; i <= 5; i++){
-        model->insertColumn(0);
-    }
     ui->ProcessTable->setStyleSheet(
         "QTableView::item:hover { background-color: none; }"
 
@@ -37,12 +45,16 @@ void MainWindow::init_table(){
     draw_process_table();
 }
 
+void MainWindow::header_click(int column){
+
+    ui->ProcessTable->sortByColumn(column, Qt::DescendingOrder);
+}
+
 void MainWindow::vt_check(std::wstring path) {
     VtDialog* dialog = new VtDialog(this, path);
     dialog->show();
     dialog->start_analysis();
 }
-
 
 void MainWindow::showContextMenu(const QPoint& pos) {
     QModelIndex index = ui->ProcessTable->indexAt(pos);
@@ -81,15 +93,20 @@ void MainWindow::update_table_rows_amount(int new_rows_count){
 void MainWindow::update_processes(){
     std::vector<ProcessInfo> processes = get_process_list();
     update_table_rows_amount(processes.size());
-    ui->ProcessTable->setUpdatesEnabled(false); // отключаем сигналы чтоб кути хернёй маялся
-    int size = bubbleSort(processes);
+    ui->ProcessTable->setUpdatesEnabled(false);
+    // int size = bubbleSortProc(processes);
     int i = 0;
     path_vector.clear();
     for (ProcessInfo &proc : processes){
         path_vector.push_back(proc.path);
         model->setItem(i, 0, new QStandardItem(QString(proc.name)));
-        model->setItem(i, 1, new QStandardItem(QString("%1").arg(proc.memoryUsage)));
-        model->setItem(i, 2, new QStandardItem(QString("%1").arg(proc.cpuUsage)));
+        int mem_usage = proc.memoryUsage;
+        QString mem_str;
+        if (mem_usage > 1000){
+            mem_str = QString("%1.%2 Мб").arg(mem_usage / 1000).arg(mem_usage % 1000 / 10);
+        } else mem_str = QString("%1 Кб").arg(mem_usage);
+        model->setItem(i, 1, new QStandardItem(mem_str));
+        model->setItem(i, 2, new QStandardItem(format_mseconds(proc.cpuUsage)));
         model->setItem(i, 3, new QStandardItem(QString("%1").arg(proc.pid)));
         i++;
     }
@@ -98,11 +115,11 @@ void MainWindow::update_processes(){
 
 void MainWindow::erase_column(int col){
     ui->ProcessTable->setUpdatesEnabled(false);
-    model->horizontalHeaderItem(col)->setText("");
+    // model->horizontalHeaderItem(col)->setText("");
     for (int row = 0; row < model->rowCount(); ++row) {
         QStandardItem* item = model->item(row, col);
         if (item) {
-            item->setText(""); // очищаем текст
+            item->setText("");
         }
     }
     ui->ProcessTable->setUpdatesEnabled(true);
@@ -117,8 +134,9 @@ void MainWindow::resize_columns_to_content(){
 
 void MainWindow::update_networks(){
     std::vector<NetworkPerformanceItem> networks =  get_networks_list();
+    // bubble_sort_net(networks);
     update_table_rows_amount(networks.size());
-    ui->ProcessTable->setUpdatesEnabled(false); // отключаем сигналы чтоб кути хернёй маялся
+    ui->ProcessTable->setUpdatesEnabled(false);
     int i = 0;
     path_vector.clear();
     for (NetworkPerformanceItem &perf : networks){
@@ -129,7 +147,7 @@ void MainWindow::update_networks(){
         if (outbound_value > 1000){
             outbound_str = QString("%1.%2 Мб/c").arg(outbound_value / 1000).arg(outbound_value % 1000 / 10);
         } else outbound_str = QString("%1 Кб/c").arg(outbound_value);
-        long inbound_value = perf.OutboundBandwidth / 1000;
+        long inbound_value = perf.InboundBandwidth / 1000;
         QString inbound_str;
         if (inbound_value > 1000){
             inbound_str = QString("%1.%2 Мб/c").arg(inbound_value / 1000).arg(inbound_value % 1000 / 10);
@@ -138,24 +156,52 @@ void MainWindow::update_networks(){
         model->setItem(i, 2, new QStandardItem(inbound_str));
         model->setItem(i, 3, new QStandardItem(QString::fromStdString(perf.LocalAddress)));
         model->setItem(i, 4, new QStandardItem(QString::fromStdString(perf.RemoteAddress)));
+        model->setItem(i, 5, new QStandardItem(QString("%1").arg(perf.ProcessId)));
         i++;
     }
     ui->ProcessTable->setUpdatesEnabled(true);
 }
 
 void MainWindow::draw_network_table(){
-    current_table = NETWORK_TABLE;
-    model->setHorizontalHeaderLabels({"Exe name", "Network in", "Network out", "Local IP", "Remote IP"});
-    update_networks();
-    resize_columns_to_content();
+    if (current_table != NETWORK_TABLE){
+
+        process_col_width.clear();
+        for (int i = 0; i < PROCESS_TABLE_COL_COUNT; i++){
+            process_col_width.push_back(ui->ProcessTable->columnWidth(i));
+        }
+        current_table = NETWORK_TABLE;
+        model->setHorizontalHeaderLabels({"Exe name", "Network out", "Network in", "Local IP", "Remote IP", "PID", ""});
+        if (!network_col_width.empty()){
+            for (int i = 0; i < PROCESS_TABLE_COL_COUNT; i++) ui->ProcessTable->setColumnWidth(i, network_col_width[i]);
+        } else resize_columns_to_content();
+        update_networks();
+    }
 }
 
 void MainWindow::draw_process_table(){
-    current_table = PROCESS_TABLE;
-    model->setHorizontalHeaderLabels({"Exe name", "Memory", "CPU", "PID", "", ""});
-    update_processes();
-    erase_column(4);
-    resize_columns_to_content();
+    if (current_table != PROCESS_TABLE){
+        if (model->columnCount() > 5){
+            // Удаляю разницу столбцов (считается, что у нетворка всегда больше столбцом, чем у процесса)
+            for (int i = 0; i < NETWORK_TABLE_COL_COUNT - PROCESS_TABLE_COL_COUNT; i++) model -> removeColumn(PROCESS_TABLE_COL_COUNT + 1);
+        }
+
+        if (!process_col_width.empty()) {
+            network_col_width.clear();
+            for (int i = 0; i < NETWORK_TABLE_COL_COUNT; i++){
+                network_col_width.push_back(ui->ProcessTable->columnWidth(i));
+            }
+        }
+
+        current_table = PROCESS_TABLE;
+        model->setHorizontalHeaderLabels({"Exe name", "Memory", "CPU", "PID", ""});
+        update_processes();
+        erase_column(4);
+        erase_column(5);
+        if (!process_col_width.empty()){
+            for (int i = 0; i < PROCESS_TABLE_COL_COUNT; i++) ui->ProcessTable->setColumnWidth(i, process_col_width[i]);
+        }
+        else resize_columns_to_content();
+    }
 }
 
 void MainWindow::update_button(){
@@ -181,6 +227,16 @@ void MainWindow::set_virustotal_api_key(){
     // Сохраняем ключ
     settings.setValue("VirusTotal/apiKey", apiKey);
 
+}
+
+int extractLeadingDigits(const QString& str) {
+    int result = 0;
+    for (const QChar& ch : str) {
+        if (ch.isDigit()) {
+            result = result * 10 + ch.digitValue();
+        } else break;
+    }
+    return result;
 }
 
 

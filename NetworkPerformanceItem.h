@@ -17,9 +17,10 @@ public:
     int RemotePort;
     LONG BytesOut;
     LONG BytesIn;
-    int OutboundBandwidth;
-    int InboundBandwidth;
+    ULONG64 OutboundBandwidth;
+    ULONG64 InboundBandwidth;
 
 };
 
 std::vector<NetworkPerformanceItem> get_networks_list();
+void bubble_sort_net(std::vector<NetworkPerformanceItem> &vector);

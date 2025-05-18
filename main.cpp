@@ -10,7 +10,6 @@ std::vector<ProcessInfo> get_process_list();
 int bubbleSort(std::vector<ProcessInfo> &vector);
 
 
-
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);

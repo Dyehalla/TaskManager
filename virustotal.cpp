@@ -38,7 +38,6 @@ QString uploadFileToVirusTotal(QNetworkAccessManager &networkManager, QString& f
     QString analysisId;
     if (reply->error() == QNetworkReply::NoError) {
         QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-        qDebug() << doc;
         analysisId = doc.object()["data"].toObject()["id"].toString();
     } else {
         QMessageBox::critical(nullptr, "Ошибка", "Ваш API ключ не действителен");

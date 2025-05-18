@@ -37,6 +37,12 @@
           <property name="spacing">
            <number>40</number>
           </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QPushButton" name="NetworkPageButton">
             <property name="sizePolicy">

@@ -10,9 +10,41 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDir>
+#include <QSortFilterProxyModel>
 
 #define PROCESS_TABLE 0
 #define NETWORK_TABLE 1
+
+int extractLeadingDigits(const QString& str);
+
+class CustomSortModel : public QSortFilterProxyModel {
+
+public:
+    int* current_table;
+    CustomSortModel(QObject* parent = nullptr, int* table = nullptr){
+        current_table = table;
+    }
+
+protected:
+    bool lessThan(const QModelIndex& left, const QModelIndex& right) const override {
+        QString ldata = left.data().toString();
+        QString rdata = right.data().toString();
+        int col = left.column();
+        if (col == 1 || (col == 2 && *current_table == NETWORK_TABLE)){
+            int ldata_int = extractLeadingDigits(ldata);
+            int rdata_int = extractLeadingDigits(rdata);
+            if (ldata.contains("Мб")) ldata_int *= 1000;
+            if (rdata.contains("Мб")) rdata_int *= 1000;
+            return ldata_int < rdata_int;
+        }
+        if ((col == 3 && *current_table == PROCESS_TABLE) || col == 5){
+            int ldata_int = extractLeadingDigits(ldata);
+            int rdata_int = extractLeadingDigits(rdata);
+            return ldata_int < rdata_int;
+        }
+        return QSortFilterProxyModel::lessThan(left, right);
+    }
+};
 
 class NonEditableModel : public QStandardItemModel {
     Qt::ItemFlags flags(const QModelIndex &index) const override {
@@ -29,11 +61,16 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
+    Ui::MainWindow *ui;  // Указатель на сгенерированный UI
+
     NonEditableModel *model;
+    CustomSortModel* sort_model;
     QNetworkAccessManager networkManager;
 
-    int current_table = PROCESS_TABLE;
+    int current_table = -1;
     std::vector<std::wstring> path_vector;
+    std::vector<int> process_col_width = {};
+    std::vector<int> network_col_width = {};
 
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -52,7 +89,6 @@ public:
     void vt_check(std::wstring path);
     void set_virustotal_api_key();
 
-// private:
-    Ui::MainWindow *ui;  // Указатель на сгенерированный UI
+    void header_click(int column);
 
 };

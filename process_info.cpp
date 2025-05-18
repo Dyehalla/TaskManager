@@ -24,16 +24,14 @@ vector<ProcessInfo> get_process_list() {
                 info.path = filePath;
             } else continue;
 
-            //Получаем память
+            // Получаем память
             PROCESS_MEMORY_COUNTERS_EX2 pmc;
             if (GetProcessMemoryInfo(hProcess, (PROCESS_MEMORY_COUNTERS*)&pmc, sizeof(pmc))) {
                 memory_usage = pmc.PrivateWorkingSetSize / 1024; // В килобайтах
             } else memory_usage = 0;
 
-            //Получаем время ЦП
+            // Получаем время ЦП
             if (GetProcessTimes(hProcess, &creationTime, &exitTime, &kernelTime, &userTime)) {
-
-                // Преобразуем FILETIME в 64-битное число
                 ULARGE_INTEGER kernel_time_ul, user_time_ul;
                 kernel_time_ul.LowPart = kernelTime.dwLowDateTime;
                 kernel_time_ul.HighPart = kernelTime.dwHighDateTime;
@@ -44,7 +42,7 @@ vector<ProcessInfo> get_process_list() {
                 total_time = kernel_time_ul.QuadPart + user_time_ul.QuadPart;
 
                 // Преобразуем в секунды (1 сек = 10 000 000 * 100 нс)
-                total_time = static_cast<double>(total_time) / 10000000.0;
+                total_time = total_time / 10000.0;
 
             } else {
                 qDebug() << "some shit happened in cpu time: " << info.path;
@@ -75,7 +73,7 @@ vector<ProcessInfo> get_process_list() {
     return processes;
 }
 
-int bubbleSort(std::vector<ProcessInfo> &vector)
+int bubbleSortProc(std::vector<ProcessInfo> &vector)
 {
     int size = vector.size();
     for (int i = 0; i < size - 1; i++)
@@ -104,4 +102,18 @@ inline BOOL TerminateProcessById(DWORD processId) {
     // Закрываем хэндл процесса
     CloseHandle(hProcess);
     return result;
+}
+
+QString format_mseconds(long long milliseconds) {
+    const long long hours = milliseconds / (1000 * 60 * 60);
+    const long long minutes = (milliseconds / (1000 * 60)) % 60;
+    const long long seconds = (milliseconds / 1000) % 60;
+    const long long ms = milliseconds % 1000;
+
+    // Форматируем с ведущими нулями
+    return QString("%1:%2:%3.%4")
+        .arg(hours, 2, 10, QChar('0'))     // чч (2 цифры)
+        .arg(minutes, 2, 10, QChar('0'))   // мм (2 цифры)
+        .arg(seconds, 2, 10, QChar('0'))  // сс (2 цифры)
+        .arg(ms / 10, 2, 10, QChar('0'));      // мс (2 цифры)
 }

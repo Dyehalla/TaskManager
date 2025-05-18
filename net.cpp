@@ -120,6 +120,7 @@ std::vector<NetworkPerformanceItem> get_networks_list()
                 }
 
                 bandwidthRod = (PTCP_ESTATS_BANDWIDTH_ROD_v0)rod;
+
                 networkPerformanceItem.OutboundBandwidth = bandwidthRod->OutboundBandwidth;
                 networkPerformanceItem.InboundBandwidth = bandwidthRod->InboundBandwidth;
                 free(rod);
@@ -138,6 +139,19 @@ std::vector<NetworkPerformanceItem> get_networks_list()
 
     bubbleSortNet(networkPerformanceItems);
     return networkPerformanceItems;
+}
+
+void bubble_sort_net(std::vector<NetworkPerformanceItem> &vector)
+{
+    int size = vector.size();
+    for (int i = 0; i < size - 1; i++)
+    {
+        for (int j = 0; j < size - i - 1; j++)
+        {
+            if (vector[j].InboundBandwidth < vector[j + 1].InboundBandwidth)
+                std::swap(vector[j], vector[j + 1]);
+        }
+    }
 }
 
 

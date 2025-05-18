@@ -18,6 +18,7 @@ struct ProcessInfo
 };
 
 std::vector<ProcessInfo> get_process_list();
-int bubbleSort(std::vector<ProcessInfo> &vector);
+int bubbleSortProc(std::vector<ProcessInfo> &vector);
 inline BOOL TerminateProcessById(DWORD processId);
+QString format_mseconds(long long milliseconds);
 #endif // PROCESSINFO_H
