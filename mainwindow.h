@@ -50,6 +50,7 @@ public:
     void update_table_rows_amount(int new_rows_count);
     void showContextMenu(const QPoint& pos);
     void vt_check(std::wstring path);
+    void set_virustotal_api_key();
 
 // private:
     Ui::MainWindow *ui;  // Указатель на сгенерированный UI

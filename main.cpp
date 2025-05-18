@@ -14,15 +14,9 @@ int bubbleSort(std::vector<ProcessInfo> &vector);
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-
+    QApplication::setOrganizationName("Academy of VibeCoding");
+    QCoreApplication::setApplicationName("ShitManager");
     MainWindow window;
-
-    // for (int i = 0; i < init_process_amount; i++)
-    // {
-    //     window.create_process_widget();
-    // }
-
-
 
     window.show();
 

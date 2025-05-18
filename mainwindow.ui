@@ -25,6 +25,13 @@
       </property>
       <layout class="QVBoxLayout" name="UpperButtonsVerticalLayout">
        <item>
+        <widget class="QPushButton" name="ChangeApiKey">
+         <property name="text">
+          <string>Сменить ключ</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QWidget" name="UpperUpperButtons" native="true">
          <layout class="QHBoxLayout" name="UpperUpperButtonsHorizontalLayout">
           <property name="spacing">

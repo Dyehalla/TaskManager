@@ -8,10 +8,12 @@
 #include <QDebug>
 #include <QEventLoop>
 #include <QCoreApplication>
+#include <QSettings>
+#include <QInputDialog>
+#include <QMessageBox>
 
 void waitForReply(QNetworkReply* reply);
 
-QString uploadFileToVirusTotal(QNetworkAccessManager &networkManager, const QString& filePath, const QString& apiKey);
-QJsonObject getVirusTotalReport(QNetworkAccessManager &networkManager, const QString& analysisId, const QString& apiKey);
-
-QJsonObject getVirusTotalReport(const QString& analysisId, const QString& apiKey);
+QString uploadFileToVirusTotal(QNetworkAccessManager &networkManager, QString& filePath, QString& apiKey);
+QString uploadBigFileToVirusTotal(QNetworkAccessManager &networkManager, QString& filePath, QString& apiKey);
+QJsonObject getVirusTotalReport(QNetworkAccessManager &networkManager, QString& analysisId, QString& apiKey);

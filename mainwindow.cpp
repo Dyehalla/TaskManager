@@ -5,20 +5,16 @@
 #include "virustotal.h"
 #include "vt_dialog.h"
 
-void MainWindow::test(){
-    const QString apiKey = "332b1e51ec7ce35a0738543eb468611f333500ed9e39bfe46cd5e75db041b77b";
-    const QString filePath = "C:/games/Braid.Anniversary.Edition.v20240603/braid64_d3d11_final.exe";
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+    model = new NonEditableModel;
+    ui->setupUi(this);  // Инициализация UI
+    connect(ui->UpdateButton, &QPushButton::clicked, this, &MainWindow::update_button);
+    connect(ui->NetworkPageButton, &QPushButton::clicked, this, &MainWindow::draw_network_table);
+    connect(ui->ProcessPageButton, &QPushButton::clicked, this, &MainWindow::draw_process_table);
+    connect(ui->ChangeApiKey, &QPushButton::clicked, this, &MainWindow::set_virustotal_api_key);
 
-    // Загружаем файл
-    QString analysisId = uploadFileToVirusTotal(networkManager, filePath, apiKey);
+    init_table();
 
-
-    qDebug() << "Analysis ID:" << analysisId;
-
-    // Получаем отчет
-    QThread::msleep(5000);
-    QJsonObject report = getVirusTotalReport(networkManager, analysisId, apiKey);
-    qDebug() << "Report:" << report;
 }
 
 void MainWindow::init_table(){
@@ -42,8 +38,9 @@ void MainWindow::init_table(){
 }
 
 void MainWindow::vt_check(std::wstring path) {
-    VtDialog dialog(this, path);
-    dialog.exec();
+    VtDialog* dialog = new VtDialog(this, path);
+    dialog->show();
+    dialog->start_analysis();
 }
 
 
@@ -67,17 +64,6 @@ void MainWindow::showContextMenu(const QPoint& pos) {
     }
 }
 
-
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-    model = new NonEditableModel;
-    ui->setupUi(this);  // Инициализация UI
-    connect(ui->UpdateButton, &QPushButton::clicked, this, &MainWindow::update_button);
-    connect(ui->NetworkPageButton, &QPushButton::clicked, this, &MainWindow::draw_network_table);
-    connect(ui->ProcessPageButton, &QPushButton::clicked, this, &MainWindow::draw_process_table);
-
-    init_table();
-
-}
 
 MainWindow::~MainWindow() {
     delete ui;
@@ -134,10 +120,22 @@ void MainWindow::update_networks(){
     update_table_rows_amount(networks.size());
     ui->ProcessTable->setUpdatesEnabled(false); // отключаем сигналы чтоб кути хернёй маялся
     int i = 0;
+    path_vector.clear();
     for (NetworkPerformanceItem &perf : networks){
+        path_vector.push_back(perf.ExePath);
         model->setItem(i, 0, new QStandardItem(QString(perf.ExeName)));
-        model->setItem(i, 1, new QStandardItem(QString("%1").arg(perf.OutboundBandwidth / 1024 / 1024)));
-        model->setItem(i, 2, new QStandardItem(QString("%1").arg(perf.InboundBandwidth / 1024 / 1024)));
+        long outbound_value = perf.OutboundBandwidth / 1000;
+        QString outbound_str;
+        if (outbound_value > 1000){
+            outbound_str = QString("%1.%2 Мб/c").arg(outbound_value / 1000).arg(outbound_value % 1000 / 10);
+        } else outbound_str = QString("%1 Кб/c").arg(outbound_value);
+        long inbound_value = perf.OutboundBandwidth / 1000;
+        QString inbound_str;
+        if (inbound_value > 1000){
+            inbound_str = QString("%1.%2 Мб/c").arg(inbound_value / 1000).arg(inbound_value % 1000 / 10);
+        } else inbound_str = QString("%1 Кб/c").arg(inbound_value);
+        model->setItem(i, 1, new QStandardItem(outbound_str));
+        model->setItem(i, 2, new QStandardItem(inbound_str));
         model->setItem(i, 3, new QStandardItem(QString::fromStdString(perf.LocalAddress)));
         model->setItem(i, 4, new QStandardItem(QString::fromStdString(perf.RemoteAddress)));
         i++;
@@ -165,5 +163,24 @@ void MainWindow::update_button(){
     else if (current_table == NETWORK_TABLE) update_networks();
 }
 
+void MainWindow::set_virustotal_api_key(){
+    QSettings settings;
+    bool ok;
+    QString apiKey = QInputDialog::getText(this,
+                                           "VirusTotal API Key",
+                                           "Введите ваш API ключ для VirusTotal:",
+                                           QLineEdit::Normal,
+                                           "",
+                                           &ok);
+
+    if (!ok || apiKey.isEmpty()) {
+        QMessageBox::warning(this,
+                             "Ошибка",
+                             "API ключ не был введен. Функционал VirusTotal недоступен.");
+    }
+    // Сохраняем ключ
+    settings.setValue("VirusTotal/apiKey", apiKey);
+
+}
 
 
