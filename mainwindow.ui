@@ -73,9 +73,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="UpdateButton">
+        <widget class="QPushButton" name="changeTimer">
          <property name="text">
-          <string>Обновить</string>
+          <string>Сменить частоту обновления</string>
          </property>
         </widget>
        </item>

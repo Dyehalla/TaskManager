@@ -14,11 +14,11 @@ struct ProcessInfo
     std::wstring path;
     long memoryUsage{};
     double cpuUsage{};
-    int pid;
+    std::vector<DWORD> pid;
 };
 
 std::vector<ProcessInfo> get_process_list();
-int bubbleSortProc(std::vector<ProcessInfo> &vector);
-inline BOOL TerminateProcessById(DWORD processId);
+int bubbleSortProc(std::vector<ProcessInfo> &vector, int mode);
+BOOL TerminateProcessById(DWORD processId);
 QString format_mseconds(long long milliseconds);
 #endif // PROCESSINFO_H

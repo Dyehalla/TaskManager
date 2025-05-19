@@ -141,18 +141,28 @@ std::vector<NetworkPerformanceItem> get_networks_list()
     return networkPerformanceItems;
 }
 
-void bubble_sort_net(std::vector<NetworkPerformanceItem> &vector)
+#define NAME_SORT 0
+#define NET_IN_SORT 2
+#define NET_OUT_SORT 1
+#define LOCAL_IP_SORT 3
+#define REMOTE_IP_SORT 4
+
+void bubble_sort_net(std::vector<NetworkPerformanceItem> &vector, int mode)
 {
     int size = vector.size();
     for (int i = 0; i < size - 1; i++)
     {
         for (int j = 0; j < size - i - 1; j++)
         {
-            if (vector[j].InboundBandwidth < vector[j + 1].InboundBandwidth)
-                std::swap(vector[j], vector[j + 1]);
+            bool cond = false;
+            if (mode == NAME_SORT) cond = vector[j].ExeName < vector[j + 1].ExeName;
+            else if (mode == NET_IN_SORT ) cond = vector[j].InboundBandwidth < vector[j + 1].InboundBandwidth;
+            else if (mode == NET_OUT_SORT) cond = vector[j].OutboundBandwidth < vector[j + 1].OutboundBandwidth;
+            else if (mode == LOCAL_IP_SORT) cond = vector[j].LocalAddress < vector[j + 1].LocalAddress;
+            else if (mode == REMOTE_IP_SORT) cond = vector[j].RemoteAddress < vector[j + 1].RemoteAddress;
+            if (cond) std::swap(vector[j], vector[j + 1]);
         }
     }
 }
-
 
 

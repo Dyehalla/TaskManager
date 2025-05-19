@@ -73,6 +73,7 @@ void VtDialog::start_analysis() {
         report = getVirusTotalReport(*networkManager, analysisId, apiKey);
         if (cancelled) return;
         QString status = report["data"].toObject()["attributes"].toObject()["status"].toString();
+        qDebug() << status;
         if (status == "completed") {
             break;
         }

@@ -23,4 +23,4 @@ public:
 };
 
 std::vector<NetworkPerformanceItem> get_networks_list();
-void bubble_sort_net(std::vector<NetworkPerformanceItem> &vector);
+void bubble_sort_net(std::vector<NetworkPerformanceItem> &vector, int mode);

@@ -13,7 +13,6 @@ vector<ProcessInfo> get_process_list() {
         do {
             ProcessInfo info;
             info.name = pe32.szExeFile;
-            info.pid = pe32.th32ProcessID;
             HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pe32.th32ProcessID);
             wchar_t filePath[MAX_PATH];
             size_t memory_usage;
@@ -53,6 +52,7 @@ vector<ProcessInfo> get_process_list() {
             bool unique = true;
             for (ProcessInfo &i : processes){
                 if (i.path == filePath){
+                    i.pid.push_back(pe32.th32ProcessID);
                     i.memoryUsage += memory_usage;
                     i.cpuUsage += total_time;
                     unique = false;
@@ -61,6 +61,7 @@ vector<ProcessInfo> get_process_list() {
             }
 
             if (unique){
+                info.pid = {pe32.th32ProcessID};
                 info.cpuUsage = total_time;
                 info.memoryUsage = memory_usage;
                 processes.push_back(info);
@@ -73,22 +74,29 @@ vector<ProcessInfo> get_process_list() {
     return processes;
 }
 
-int bubbleSortProc(std::vector<ProcessInfo> &vector)
+#define NAME_SORT 0
+#define CPU_SORT 1
+#define MEMORY_SORT 2
+
+int bubbleSortProc(std::vector<ProcessInfo> &vector, int mode)
 {
     int size = vector.size();
     for (int i = 0; i < size - 1; i++)
     {
         for (int j = 0; j < size - i - 1; j++)
         {
-            if (vector[j].memoryUsage < vector[j + 1].memoryUsage)
-                std::swap(vector[j], vector[j + 1]);
+            bool cond = false;
+            if (mode == NAME_SORT) cond = vector[j].name < vector[j + 1].name;
+            else if (mode == CPU_SORT ) cond = vector[j].cpuUsage < vector[j + 1].cpuUsage;
+            else if (mode == MEMORY_SORT) cond = vector[j].memoryUsage < vector[j + 1].memoryUsage;
+            if (cond) std::swap(vector[j], vector[j + 1]);
         }
     }
     return size;
 }
 
 // Функция для завершения процесса по ID (не знаю зачем инлайн, слион подсказал я согласился)
-inline BOOL TerminateProcessById(DWORD processId) {
+BOOL TerminateProcessById(DWORD processId) {
     // Открываем процесс с правом на завершение:
     // PROCESS_TERMINATE - процесс с правом на завершение,
     // FALSE - дескриптор не будет наследоваться,
