@@ -12,7 +12,7 @@
 #include <QUrl>
 #include <QDir>
 #include <QSortFilterProxyModel>
-
+#include <QTableView>
 
 #define PROCESS_TABLE 0
 #define NETWORK_TABLE 1
@@ -35,6 +35,7 @@ class MainWindow : public QMainWindow {
 
 public:
     Ui::MainWindow *ui;  // Указатель на сгенерированный UI
+    QTableView *table;
 
     NonEditableModel *model;
     QNetworkAccessManager networkManager;
@@ -68,5 +69,5 @@ public:
     void timeout();
     void change_timer();
     void header_click(int column);
-
+    void change_table();
 };

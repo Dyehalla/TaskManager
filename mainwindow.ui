@@ -16,77 +16,65 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="CentralWidgetVerticalLayout">
     <item>
-     <widget class="QWidget" name="UpperButtonsWidget" native="true">
+     <widget class="QWidget" name="widget" native="true">
       <property name="minimumSize">
        <size>
         <width>0</width>
-        <height>60</height>
+        <height>100</height>
        </size>
       </property>
-      <layout class="QVBoxLayout" name="UpperButtonsVerticalLayout">
-       <item>
-        <widget class="QPushButton" name="ChangeApiKey">
-         <property name="text">
-          <string>Сменить ключ</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="UpperUpperButtons" native="true">
-         <layout class="QHBoxLayout" name="UpperUpperButtonsHorizontalLayout">
-          <property name="spacing">
-           <number>40</number>
+      <widget class="QWidget" name="horizontalLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>10</y>
+         <width>361</width>
+         <height>80</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="TableSwitchLayout">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Процессы</string>
           </property>
-          <property name="topMargin">
-           <number>0</number>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Сеть</string>
           </property>
-          <property name="bottomMargin">
-           <number>0</number>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="horizontalLayoutWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>770</x>
+         <y>10</y>
+         <width>321</width>
+         <height>80</height>
+        </rect>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="ChangeApiKey">
+          <property name="text">
+           <string>Сменить ключ</string>
           </property>
-          <item>
-           <widget class="QPushButton" name="NetworkPageButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Сеть</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="ProcessPageButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Процессы</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="changeTimer">
-         <property name="text">
-          <string>Сменить частоту обновления</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTableView" name="ProcessTable">
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectionBehavior::SelectItems</enum>
-         </property>
-        </widget>
-       </item>
-      </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="changeTimer">
+          <property name="text">
+           <string>Сменить частоту обновления</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>

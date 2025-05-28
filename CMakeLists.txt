@@ -25,6 +25,9 @@ qt_add_executable(App
     timer_dialog.ui
     timer_dialog.cpp
     timer_dialog.h
+    custom_button.h
+    custom_table.h
+
 )
 
 target_include_directories(App PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
