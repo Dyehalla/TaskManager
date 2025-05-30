@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->centralwidget->layout()->addWidget(table);
 
     ToggleButton *toggleBtn = new ToggleButton(this);
+    toggleBtn->setCursor(Qt::PointingHandCursor);
     ui->TableSwitchLayout->insertWidget(1, toggleBtn);
 
     connect(ui->ChangeApiKey, &QPushButton::clicked, this, &MainWindow::set_virustotal_api_key);
@@ -138,6 +139,7 @@ void MainWindow::update_table_rows_amount(int new_rows_count){
 
 void MainWindow::update_processes(){
     pid_map.clear();
+    QFileIconProvider iconProvider;
     std::vector<ProcessInfo> processes = get_process_list();
     update_table_rows_amount(processes.size());
     table->setUpdatesEnabled(false);
@@ -146,7 +148,11 @@ void MainWindow::update_processes(){
     path_vector.clear();
     for (ProcessInfo &proc : processes){
         path_vector.push_back(proc.path);
-        model->item(i, 0)->setText(QString(proc.name));
+        QIcon icon = iconProvider.icon(QFileInfo(QString(proc.path)));
+        QStandardItem *item = new QStandardItem(QString(proc.name));
+        item->setIcon(icon); // Ставим иконку
+        item->setTextAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+        model->setItem(i, 0, item);
         int mem_usage = proc.memoryUsage;
         QString mem_str;
         if (mem_usage > 1000){
@@ -166,16 +172,6 @@ void MainWindow::update_processes(){
         }
         i++;
     }
-
-
-    QFileIconProvider iconProvider;
-    QIcon icon = iconProvider.icon(QFileInfo("C:/games/Braid.Anniversary.Edition.v20240603/braid64_d3d11_final.exe"));
-    QStandardItem *item = new QStandardItem("Текст");
-    item->setIcon(icon);
-
-    item->setTextAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-    model->setItem(0, 1, item);
-
 
     table->setUpdatesEnabled(true);
 
@@ -201,6 +197,7 @@ void MainWindow::resize_columns_to_content(){
 }
 
 void MainWindow::update_networks(){
+    QFileIconProvider iconProvider;
     std::vector<NetworkPerformanceItem> networks =  get_networks_list();
     bubble_sort_net(networks, network_sort);
     update_table_rows_amount(networks.size());
@@ -209,7 +206,11 @@ void MainWindow::update_networks(){
     path_vector.clear();
     for (NetworkPerformanceItem &perf : networks){
         path_vector.push_back(perf.ExePath);
-        model->item(i, 0)->setText(QString(perf.ExeName));
+        QIcon icon = iconProvider.icon(QFileInfo(QString(perf.ExePath)));
+        QStandardItem *item = new QStandardItem(QString(perf.ExeName));
+        item->setIcon(icon); // Ставим иконку
+        item->setTextAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+        model->setItem(i, 0, item);
         long outbound_value = perf.OutboundBandwidth / 1000;
         QString outbound_str;
         if (outbound_value > 1000){
@@ -262,7 +263,7 @@ void MainWindow::draw_process_table(){
         }
 
         current_table = PROCESS_TABLE;
-        model->setHorizontalHeaderLabels({"Exe name", "Memory", "CPU", "PID", ""});
+        model->setHorizontalHeaderLabels({"Имя", "Память", "Время ЦП", "PID", ""});
         update_processes();
         erase_column(4);
         erase_column(5);
@@ -297,15 +298,5 @@ void MainWindow::set_virustotal_api_key(){
     settings.setValue("VirusTotal/apiKey", apiKey);
 
 }
-
-// int extractLeadingDigits(const QString& str) {
-//     int result = 0;
-//     for (const QChar& ch : str) {
-//         if (ch.isDigit()) {
-//             result = result * 10 + ch.digitValue();
-//         } else break;
-//     }
-//     return result;
-// }
 
 

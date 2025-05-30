@@ -20,7 +20,7 @@
       <property name="minimumSize">
        <size>
         <width>0</width>
-        <height>100</height>
+        <height>55</height>
        </size>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -36,6 +36,9 @@
            </property>
            <property name="text">
             <string>Процессы   </string>
+           </property>
+           <property name="margin">
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -71,6 +74,22 @@
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
           <widget class="QPushButton" name="ChangeApiKey">
+           <property name="cursor">
+            <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
+       background-color: black;
+       border: none;
+       color: white;
+       padding: 8px 16px;
+       text-align: center;
+       text-decoration: none;
+       font-size: 14px;
+       margin: 4px 2px;
+       border-radius: 4px;
+    }</string>
+           </property>
            <property name="text">
             <string>Сменить ключ</string>
            </property>
@@ -78,6 +97,22 @@
          </item>
          <item>
           <widget class="QPushButton" name="changeTimer">
+           <property name="cursor">
+            <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton {
+       background-color: black;
+       border: none;
+       color: white;
+       padding: 8px 16px;
+       text-align: center;
+       text-decoration: none;
+       font-size: 14px;
+       margin: 4px 2px;
+       border-radius: 4px;
+    }</string>
+           </property>
            <property name="text">
             <string>Сменить частоту обновления</string>
            </property>

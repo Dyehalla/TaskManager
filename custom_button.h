@@ -29,7 +29,7 @@ public:
     }
 
     QSize sizeHint() const override {
-        return QSize(60, 30); // Рекомендуемый размер
+        return QSize(50, 25); // Рекомендуемый размер
     }
 
     int sliderPosition() const { return m_sliderPosition; }
@@ -42,15 +42,8 @@ protected:
     void paintEvent(QPaintEvent *) override {
         QPainter p(this);
         p.setRenderHint(QPainter::Antialiasing);
-
-        // 1. Рисуем фон
         drawBackground(p);
-
-        // 2. Рисуем ползунок
         drawSlider(p);
-
-        // 3. Опционально: рисуем текст
-        drawText(p);
     }
 
     void resizeEvent(QResizeEvent *e) override {
@@ -77,21 +70,6 @@ private:
         p.drawEllipse(sliderRect);
     }
 
-    void drawText(QPainter &p) {
-        if (!text().isEmpty()) {
-            p.setPen(m_textColor);
-            p.setFont(font());
-
-            // Сдвигаем текст в зависимости от положения ползунка
-            QRect textRect = rect().adjusted(5, 0, -5, 0);
-            if (isChecked()) {
-                p.drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, text());
-            } else {
-                p.drawText(textRect, Qt::AlignRight | Qt::AlignVCenter, text());
-            }
-        }
-    }
-
     void updateSliderPosition(bool checked) {
         m_animation->stop();
         m_animation->setStartValue(m_sliderPosition);
@@ -105,7 +83,7 @@ private:
 
     // Цвета можно сделать настраиваемыми через свойства
     QColor m_uncheckedColor = QColor("#e0e0e0");
-    QColor m_checkedColor = QColor("#4CAF50");
+    QColor m_checkedColor = QColor("#e0e0e0");
     QColor m_sliderColor = Qt::white;
     QColor m_textColor = Qt::black;
 };
