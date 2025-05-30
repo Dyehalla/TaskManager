@@ -8,7 +8,7 @@
 #include "timer_dialog.h"
 #include "custom_button.h"
 #include "custom_table.h"
-
+#include <QFileIconProvider>
 #define PROCESS_TABLE_COL_COUNT 4
 #define NETWORK_TABLE_COL_COUNT 6
 
@@ -23,9 +23,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ToggleButton *toggleBtn = new ToggleButton(this);
     ui->TableSwitchLayout->insertWidget(1, toggleBtn);
 
-    table->verticalHeader()->setVisible(false);
-
-    // connect(ui->UpdateButton, &QPushButton::clicked, this, &MainWindow::update_button);
     connect(ui->ChangeApiKey, &QPushButton::clicked, this, &MainWindow::set_virustotal_api_key);
     connect(ui->changeTimer, &QPushButton::clicked, this, &MainWindow::change_timer);
     connect(table->horizontalHeader(), &QHeaderView::sectionClicked,
@@ -67,11 +64,6 @@ void MainWindow::init_table(){
     table->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(table, &QTableView::customContextMenuRequested, this, &MainWindow::showContextMenu);
 
-    table->setStyleSheet(
-        "QTableView::item:hover { background-color: none; }"
-
-        );
-
     draw_process_table();
 }
 
@@ -98,7 +90,7 @@ void MainWindow::vt_check(std::wstring path) {
     dialog->start_analysis();
 }
 
-void show_ap(std::unordered_map<int, std::vector<DWORD>> map){
+void show_map(std::unordered_map<int, std::vector<DWORD>> map){
     for (std::pair<int, std::vector<DWORD>> elem : map) qDebug() << elem;
 }
 
@@ -131,10 +123,16 @@ MainWindow::~MainWindow() {
 
 void MainWindow::update_table_rows_amount(int new_rows_count){
     int rows_count = model->rowCount();
-    if (rows_count < new_rows_count){
-        model -> insertRows(rows_count - 1, new_rows_count - rows_count);
-    } else if (rows_count > new_rows_count) {
-        model->removeRows(new_rows_count, rows_count - new_rows_count);
+    while (rows_count < new_rows_count){
+        model->insertRow(rows_count);
+        for (int i = 0; i < model->columnCount(); i++){
+            model->setItem(rows_count, i, new QStandardItem());
+        }
+        rows_count++;
+    }
+    while (rows_count > new_rows_count) {
+        model->removeRow(rows_count);
+        rows_count--;
     }
 }
 
@@ -148,27 +146,39 @@ void MainWindow::update_processes(){
     path_vector.clear();
     for (ProcessInfo &proc : processes){
         path_vector.push_back(proc.path);
-        model->setItem(i, 0, new QStandardItem(QString(proc.name)));
+        model->item(i, 0)->setText(QString(proc.name));
         int mem_usage = proc.memoryUsage;
         QString mem_str;
         if (mem_usage > 1000){
             mem_str = QString("%1.%2 Мб").arg(mem_usage / 1000).arg(mem_usage % 1000 / 10);
         } else mem_str = QString("%1 Кб").arg(mem_usage);
-        model->setItem(i, 1, new QStandardItem(mem_str));
-        model->setItem(i, 2, new QStandardItem(format_mseconds(proc.cpuUsage)));
+        model->item(i, 1)->setText(mem_str);
+        model->item(i, 2)->setText(format_mseconds(proc.cpuUsage));
         if (proc.pid.size() == 1){
             pid_map[i] = {proc.pid[0]};
-            model->setItem(i, 3, new QStandardItem(QString("%1").arg(proc.pid[0])));
+            model->item(i, 3)->setText(QString("%1").arg(proc.pid[0]));
         } else {
             pid_map[i] = {};
             for (DWORD pid : proc.pid){
                 pid_map[i].push_back(pid);
             }
-            model->setItem(i, 3, new QStandardItem());
+            model->item(i, 3)->setText("");
         }
         i++;
     }
+
+
+    QFileIconProvider iconProvider;
+    QIcon icon = iconProvider.icon(QFileInfo("C:/games/Braid.Anniversary.Edition.v20240603/braid64_d3d11_final.exe"));
+    QStandardItem *item = new QStandardItem("Текст");
+    item->setIcon(icon);
+
+    item->setTextAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+    model->setItem(0, 1, item);
+
+
     table->setUpdatesEnabled(true);
+
 }
 
 void MainWindow::erase_column(int col){
@@ -199,7 +209,7 @@ void MainWindow::update_networks(){
     path_vector.clear();
     for (NetworkPerformanceItem &perf : networks){
         path_vector.push_back(perf.ExePath);
-        model->setItem(i, 0, new QStandardItem(QString(perf.ExeName)));
+        model->item(i, 0)->setText(QString(perf.ExeName));
         long outbound_value = perf.OutboundBandwidth / 1000;
         QString outbound_str;
         if (outbound_value > 1000){
@@ -210,10 +220,10 @@ void MainWindow::update_networks(){
         if (inbound_value > 1000){
             inbound_str = QString("%1.%2 Мб/c").arg(inbound_value / 1000).arg(inbound_value % 1000 / 10);
         } else inbound_str = QString("%1 Кб/c").arg(inbound_value);
-        model->setItem(i, 1, new QStandardItem(outbound_str));
-        model->setItem(i, 2, new QStandardItem(inbound_str));
-        model->setItem(i, 3, new QStandardItem(QString::fromStdString(perf.LocalAddress)));
-        model->setItem(i, 4, new QStandardItem(QString::fromStdString(perf.RemoteAddress)));
+        model->item(i, 1)->setText(outbound_str);
+        model->item(i, 2)->setText(inbound_str);
+        model->item(i, 3)->setText(QString::fromStdString(perf.LocalAddress));
+        model->item(i, 4)->setText(QString::fromStdString(perf.RemoteAddress));
         model->setItem(i, 5, new QStandardItem(QString("%1").arg(perf.ProcessId)));
         i++;
     }
@@ -241,7 +251,6 @@ void MainWindow::draw_network_table(){
 void MainWindow::draw_process_table(){
     if (current_table != PROCESS_TABLE){
         if (model->columnCount() > 5){
-            // Удаляю разницу столбцов (считается, что у нетворка всегда больше столбцом, чем у процесса)
             for (int i = 0; i < NETWORK_TABLE_COL_COUNT - PROCESS_TABLE_COL_COUNT; i++) model -> removeColumn(PROCESS_TABLE_COL_COUNT + 1);
         }
 
@@ -289,14 +298,14 @@ void MainWindow::set_virustotal_api_key(){
 
 }
 
-int extractLeadingDigits(const QString& str) {
-    int result = 0;
-    for (const QChar& ch : str) {
-        if (ch.isDigit()) {
-            result = result * 10 + ch.digitValue();
-        } else break;
-    }
-    return result;
-}
+// int extractLeadingDigits(const QString& str) {
+//     int result = 0;
+//     for (const QChar& ch : str) {
+//         if (ch.isDigit()) {
+//             result = result * 10 + ch.digitValue();
+//         } else break;
+//     }
+//     return result;
+// }
 
 

@@ -3,6 +3,7 @@
 #include <QMouseEvent>
 #include <QStyledItemDelegate>
 #include <QFont>
+#include <QPainter>
 
 class TableItemDelegate : public QStyledItemDelegate
 {
@@ -14,20 +15,45 @@ public:
         QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
         opt.font = QFont("Calibri", 11, -1);
-        // Настройка выравнивания
-        if (index.column() == 0) {
-            opt.displayAlignment = Qt::AlignLeft | Qt::AlignVCenter;
-        } else {
-            opt.displayAlignment = Qt::AlignRight | Qt::AlignVCenter;
+
+        if (opt.state & QStyle::State_Selected) {
+            painter->fillRect(opt.rect, QColor("#f2f2f2"));
         }
 
-        QStyledItemDelegate::paint(painter, opt, index);
+        if (index.column() == 0) {
+            // QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
+            // icon = QIcon(":/icons/icon.svg");
+
+            // const int iconSize = 24;
+            // const int leftMargin = 16;
+            // const int spacing = 8;
+            // QRect iconRect = opt.rect;
+            // iconRect.setLeft(opt.rect.left() + leftMargin);
+            // iconRect.setWidth(iconSize);
+            // iconRect.setHeight(iconSize);
+            // iconRect.moveTop(iconRect.top() + (opt.rect.height() - iconSize) / 2);
+            // icon.paint(painter, iconRect, Qt::AlignCenter);
+            opt.displayAlignment = Qt::AlignLeft | Qt::AlignVCenter;
+
+            QRect textRect = opt.rect;
+            // textRect.setLeft(iconRect.right() + spacing);
+            textRect.adjust(0, 0, -10, 0);
+
+            painter->save();
+            painter->setFont(opt.font);
+            painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, opt.text);
+            painter->restore();
+
+        } else {
+            opt.displayAlignment = Qt::AlignRight | Qt::AlignVCenter;
+            QStyledItemDelegate::paint(painter, opt, index);
+        }
     }
 
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
     {
         QSize size = QStyledItemDelegate::sizeHint(option, index);
-        size.setHeight(48); // Увеличенная высота строки
+        size.setHeight(48);
         return size;
     }
 };
@@ -38,29 +64,9 @@ class TaskManagerTableView : public QTableView
 public:
     TaskManagerTableView(QWidget *parent = nullptr) : QTableView(parent)
     {
-        // Устанавливаем кастомный делегат
         setItemDelegate(new TableItemDelegate(this));
-
-        // Основные настройки таблицы
         setStyleSheet(
-            "QTableView {"
-            "   border: 1px solid #e0e0e0;"
-            "   background-color: white;"
-            "   gridline-color: #f0f0f0;"
-            "   font-size: 12pt;"  // Увеличенный размер шрифта
-            "   border-radius: 8px;"  // Закругленные углы
-            "}"
-            "QTableView::item {"
-            "   padding: 12px 10px;"  // Увеличенные отступы
-            "   border-bottom: 1px solid #f0f0f0;"
-            "}"
-            "QTableView::item:hover {"
-            "   background-color: #f8f8f8;"
-            "}"
-            "QTableView::item:selected {"
-            "   background-color: #e0e0e0;"
-            "   color: black;"
-            "}"
+
             "QScrollBar:vertical {"
             "   border: none;"
             "   background: #f5f5f5;"
@@ -72,9 +78,10 @@ public:
             "   min-height: 20px;"
             "   border-radius: 4px;"
             "}"
+
             );
 
-        verticalHeader()->setDefaultSectionSize(48);
+        verticalHeader()->setDefaultSectionSize(32);
         verticalHeader()->setVisible(false);
 
         QHeaderView *horizontalHeader = this->horizontalHeader();
