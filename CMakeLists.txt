@@ -15,7 +15,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON) 
 set(CMAKE_AUTORCC ON)
 
-qt_add_executable(App
+qt_add_executable(TaskMgr
     resources.qrc
     NetworkPerformanceItem.h
     NetworkPerformanceScanner.h
@@ -33,8 +33,8 @@ qt_add_executable(App
     custom_button.h
     custom_table.h
 )
-target_include_directories(App PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(App PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::Gui)
-set_target_properties(App PROPERTIES
+target_include_directories(TaskMgr PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(TaskMgr PRIVATE Qt6::Core Qt6::Widgets Qt6::Network Qt6::Gui)
+set_target_properties(TaskMgr PROPERTIES
     WIN32_EXECUTABLE TRUE
 )

@@ -11,12 +11,27 @@
 #include <QFileIconProvider>
 #define PROCESS_TABLE_COL_COUNT 4
 #define NETWORK_TABLE_COL_COUNT 6
+#include <QFontDatabase>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     model = new NonEditableModel;
     table = new TaskManagerTableView;
+    ui->setupUi(this);
 
-    ui->setupUi(this);  // Инициализация UI
+    int fontId = QFontDatabase::addApplicationFont(":/assets/UbuntuMono-Regular.ttf");
+    if (fontId != -1) {
+        QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId);
+        if (!fontFamilies.empty()) {
+            QFont font(fontFamilies.at(0), 20);
+            table->setFont(font);
+            ui->label->setFont(font);
+            ui->label_2->setFont(font);
+            ui->ChangeApiKey->setFont(font);
+            ui->changeTimer->setFont(font);
+            font.setPointSize(17);
+            table->horizontalHeader()->setFont(font);
+        }
+    }
 
     ui->centralwidget->layout()->addWidget(table);
 

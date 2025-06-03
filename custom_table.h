@@ -14,7 +14,7 @@ public:
     {
         QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
-        opt.font = QFont("Calibri", 13, -1);
+        opt.font.setPointSize(13);
         if (index.column() == 0) {
             opt.displayAlignment = Qt::AlignLeft | Qt::AlignVCenter;
         } else {
@@ -64,7 +64,7 @@ public:
             // "   padding: 12px 12px;"  // Увеличенные отступы
             "   border-right: 1px solid #e0e0e0;"
             "   border-bottom: 1px solid #e0e0e0;"
-            "   font-size: 13pt;"  // Увеличенный размер шрифта
+            "   font-size: 16pt;"  // Увеличенный размер шрифта
             "   border-radius: 0px;"  // Убираем закругления у заголовков
             "}"
 
